@@ -1,6 +1,8 @@
 package jdbc.repo;
 
 import jdbc.dataSets.DataSet;
+import jdbc.repo.executor.Executor;
+import jdbc.repo.querylists.QueryList;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -9,65 +11,45 @@ public abstract class AbstractRepository<T extends DataSet> implements Repositor
     protected Executor executor;
     protected QueryList<T> queryList;
 
-    public AbstractRepository(Connection connection) {
+    public AbstractRepository(Connection connection, QueryList<T> queryList) {
         executor = new Executor(connection);
+        this.queryList = queryList;
     }
 
     @Override
     public void insert(T entity) throws SQLException {
-//        String query = insertQuery(entity);
-        String query = queryList.insert(entity);
-        executor.executeUpdate(query);
+        executor.executeUpdate(queryList.insert(entity));
     }
-
-//    protected abstract String insertQuery(T entity);
-
-    protected abstract String tableName();
-
-//    @Override
-//    public T read(int id) throws SQLException {
-////        String query = String.format("select * from %s where id=%s", tableName(), id);
-//        String query = queryList.readQuery(id);
-//        T entity = executor.executeQuery(query, resultSet -> {
-//            resultSet.next();
-//            return getEntity(resultSet.getInt("id"),
-//                    resultSet.getString("login"),
-//                    resultSet.getString("password"));
-//        });
-//        return null;
-//    }
 
     @Override
     public int getEntityId(T entity) throws SQLException {
-//        String query = queryGetId(entity);
-        String query = queryList.getId(entity);
+        String query = queryList.getByName(entity);
         return executor.executeQuery(query, result -> {
             result.next();
             return result.getInt("id");
         });
     }
 
-//    protected abstract String queryGetId(T entity);
-
     @Override
-    public void update(int id) {
-
-    }
-
-    @Override
-    public void dropTable() throws SQLException {
-//        String query = "drop table " + tableName();
-        String query = queryList.dropTable();
+    public void update(int id, String updatingFieldName, String newValue) throws SQLException {
+        String query = queryList.changeValue(updatingFieldName, newValue);
         executor.executeUpdate(query);
     }
 
     @Override
+    public void dropTable() throws SQLException {
+        executor.executeUpdate(queryList.dropTable());
+    }
+
+    @Override
     public T delete(int id) throws SQLException {
-//        String query = String.format("delete from %s where id=%s", tableName(), id);
-        T deletedEntity  = read(id);
-        String query = queryList.delete();
+        T deletedEntity = read(id);
+        executor.executeUpdate(queryList.delete(id));
         return deletedEntity;
     }
 
-//    protected abstract T getEntity(int id, String name, String password);
+    @Override
+    public void createTable() throws SQLException {
+        executor.executeUpdate(queryList.createTable());
+    }
 }

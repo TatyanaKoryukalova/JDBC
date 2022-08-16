@@ -1,4 +1,4 @@
-package jdbc.repo;
+package jdbc.repo.executor;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

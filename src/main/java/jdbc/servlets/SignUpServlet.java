@@ -4,7 +4,6 @@ import jdbc.PageReader;
 import jdbc.dataSets.User;
 import jdbc.dbservice.UserService;
 
-import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -12,7 +11,6 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 
-@WebServlet
 public class SignUpServlet extends HttpServlet {
     private final PageReader pageReader;
     private final UserService dbService;
@@ -34,13 +32,12 @@ public class SignUpServlet extends HttpServlet {
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String login = request.getParameter("login");
         String password = request.getParameter("password");
-        int id = 0;
         try {
-            id = dbService.create(new User(login, password));
+            int id = dbService.create(new User(login, password));
             response.getWriter().println("Created entity with id " + id);
             response.setStatus(HttpServletResponse.SC_OK);
         } catch (SQLException e) {
-            response.getWriter().println("Login already exists");
+            response.getWriter().println("Login already exists" + "\n" + e.getMessage());
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         }
         response.setContentType("text/html;charset=utf-8");

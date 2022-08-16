@@ -28,10 +28,11 @@ public class UserService implements DBService<User> {
     @Override
     public User read(User user) throws SQLException {
         int id = repository.getEntityId(user);
-        if (!user.getPassword().equals(repository.getPassword(id))) {
+        User registeredUser = repository.read(id);
+        if (!user.getPassword().equals(registeredUser.getPassword())) {
             throw new WrongPasswordException("Wrong password");
         }
-        return repository.read(id);
+        return registeredUser;
     }
 
     @Override
